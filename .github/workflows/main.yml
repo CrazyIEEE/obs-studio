@@ -66,12 +66,10 @@ jobs:
             brew uninstall openssl@1.0.2t
             brew untap local/openssl
           fi
-
           if [ -d /usr/local/opt/python@2.7.17 ]; then
             brew uninstall python@2.7.17
             brew untap local/python2
           fi
-
           if [ -d /usr/local/opt/speexdsp ]; then
             brew unlink speexdsp
           fi
@@ -186,7 +184,6 @@ jobs:
           mkdir OBS.app/Contents/PlugIns
           mkdir OBS.app/Contents/Resources
           mkdir OBS.app/Contents/Frameworks
-
           cp rundir/RelWithDebInfo/bin/obs ./OBS.app/Contents/MacOS
           cp rundir/RelWithDebInfo/bin/obs-ffmpeg-mux ./OBS.app/Contents/MacOS
           if ! [ "${{ env.MACOS_CEF_BUILD_VERSION }}" -le 3770 ]; then
@@ -200,14 +197,12 @@ jobs:
           cp ../CI/scripts/macos/app/AppIcon.icns ./OBS.app/Contents/Resources
           cp -R rundir/RelWithDebInfo/obs-plugins/ ./OBS.app/Contents/PlugIns
           cp ../CI/scripts/macos/app/Info.plist ./OBS.app/Contents
-
           if [ -d ./OBS.app/Contents/Resources/data/obs-scripting ]; then
             mv ./OBS.app/Contents/Resources/data/obs-scripting/obslua.so ./OBS.app/Contents/MacOS/
             mv ./OBS.app/Contents/Resources/data/obs-scripting/_obspython.so ./OBS.app/Contents/MacOS/
             mv ./OBS.app/Contents/Resources/data/obs-scripting/obspython.py ./OBS.app/Contents/MacOS/
             rm -rf ./OBS.app/Contents/Resources/data/obs-scripting/
           fi
-
           BUNDLE_PLUGINS=(
             ./OBS.app/Contents/PlugIns/coreaudio-encoder.so
             ./OBS.app/Contents/PlugIns/decklink-ouput-ui.so
@@ -233,7 +228,6 @@ jobs:
             ./OBS.app/Contents/PlugIns/text-freetype2.so
             ./OBS.app/Contents/PlugIns/obs-outputs.so
           )
-
           if ! [ "${{ env.MACOS_CEF_BUILD_VERSION }}" -le 3770 ]; then
           ../CI/scripts/macos/app/dylibBundler -cd -of -a ./OBS.app -q -f \
             -s ./OBS.app/Contents/MacOS \
@@ -248,9 +242,7 @@ jobs:
             $(echo "${BUNDLE_PLUGINS[@]/#/-x }") \
             -x ./OBS.app/Contents/PlugIns/obs-browser-page
           fi
-
           mv ./libobs-opengl/libobs-opengl.so ./OBS.app/Contents/Frameworks
-
           cp -R /tmp/obsdeps/lib/QtNetwork.framework ./OBS.app/Contents/Frameworks
           chmod -R +w ./OBS.app/Contents/Frameworks/QtNetwork.framework
           rm -r ./OBS.app/Contents/Frameworks/QtNetwork.framework/Headers
@@ -258,12 +250,9 @@ jobs:
           chmod 644 ./OBS.app/Contents/Frameworks/QtNetwork.framework/Versions/5/Resources/Info.plist
           install_name_tool -id @executable_path/../Frameworks/QtNetwork.framework/Versions/5/QtNetwork ./OBS.app/Contents/Frameworks/QtNetwork.framework/Versions/5/QtNetwork
           install_name_tool -change /tmp/obsdeps/lib/QtCore.framework/Versions/5/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore ./OBS.app/Contents/Frameworks/QtNetwork.framework/Versions/5/QtNetwork
-
           cp -R "${{ github.workspace }}/cmbuild/cef_binary_${{ env.MACOS_CEF_BUILD_VERSION }}_macosx64/Release/Chromium Embedded Framework.framework" ./OBS.app/Contents/Frameworks/
           chown -R $(whoami) ./OBS.app/Contents/Frameworks/
-
           cp ../CI/scripts/macos/app/OBSPublicDSAKey.pem ./OBS.app/Contents/Resources
-
           if [ "${GITHUB_REF:0:10}" = "refs/tags/" ]; then
             plutil -insert CFBundleVersion -string ${{ env.OBS_GIT_TAG }} ./OBS.app/Contents/Info.plist
             plutil -insert CFBundleShortVersionString -string ${{ env.OBS_GIT_TAG }} ./OBS.app/Contents/Info.plist
@@ -271,15 +260,12 @@ jobs:
             plutil -insert CFBundleVersion -string ${{ env.OBS_GIT_TAG }}-${{ env.OBS_GIT_HASH }} ./OBS.app/Contents/Info.plist
             plutil -insert CFBundleShortVersionString -string ${{ env.OBS_GIT_TAG }}-${{ env.OBS_GIT_HASH }} ./OBS.app/Contents/Info.plist
           fi
-
           plutil -insert OBSFeedsURL -string https://obsproject.com/osx_update/feeds.xml ./OBS.app/Contents/Info.plist
           plutil -insert SUFeedURL -string https://obsproject.com/osx_update/stable/updates.xml ./OBS.app/Contents/Info.plist
           plutil -insert SUPublicDSAKeyFile -string OBSPublicDSAKey.pem ./OBS.app/Contents/Info.plist
-
           codesign --force --options runtime --sign "${SIGN_IDENTITY:--}" "./OBS.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/Autoupdate.app/Contents/MacOS/fileop"
           codesign --force --options runtime --sign "${SIGN_IDENTITY:--}" "./OBS.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/Autoupdate.app/Contents/MacOS/Autoupdate"
           codesign --force --options runtime --sign "${SIGN_IDENTITY:--}" --deep ./OBS.app/Contents/Frameworks/Sparkle.framework
-
           codesign --force --options runtime --entitlements "../CI/scripts/macos/app/entitlements.plist" --sign "${SIGN_IDENTITY:--}" "./OBS.app/Contents/Frameworks/Chromium Embedded Framework.framework/Libraries/libEGL.dylib"
           codesign --force --options runtime --entitlements "../CI/scripts/macos/app/entitlements.plist" --sign "${SIGN_IDENTITY:--}" "./OBS.app/Contents/Frameworks/Chromium Embedded Framework.framework/Libraries/libswiftshader_libEGL.dylib"
           codesign --force --options runtime --entitlements "../CI/scripts/macos/app/entitlements.plist" --sign "${SIGN_IDENTITY:--}" "./OBS.app/Contents/Frameworks/Chromium Embedded Framework.framework/Libraries/libGLESv2.dylib"
@@ -287,18 +273,14 @@ jobs:
           if ! [ "${{ env.MACOS_CEF_BUILD_VERSION }}" -le 3770 ]; then
             codesign --force --options runtime --entitlements "../CI/scripts/macos/app/entitlements.plist" --sign "${SIGN_IDENTITY:--}" "./OBS.app/Contents/Frameworks/Chromium Embedded Framework.framework/Libraries/libvk_swiftshader.dylib"
           fi
-
           if ! [ "${{ env.MACOS_CEF_BUILD_VERSION }}" -le 3770 ]; then
             codesign --force --options runtime --entitlements "../CI/scripts/macos/helpers/helper-entitlements.plist" --sign "${SIGN_IDENTITY:--}" --deep "./OBS.app/Contents/Frameworks/OBS Helper.app"
             codesign --force --options runtime --entitlements "../CI/scripts/macos/helpers/helper-gpu-entitlements.plist" --sign "${SIGN_IDENTITY:--}" --deep "./OBS.app/Contents/Frameworks/OBS Helper (GPU).app"
             codesign --force --options runtime --entitlements "../CI/scripts/macos/helpers/helper-plugin-entitlements.plist" --sign "${SIGN_IDENTITY:--}" --deep "./OBS.app/Contents/Frameworks/OBS Helper (Plugin).app"
             codesign --force --options runtime --entitlements "../CI/scripts/macos/helpers/helper-renderer-entitlements.plist" --sign "${SIGN_IDENTITY:--}" --deep "./OBS.app/Contents/Frameworks/OBS Helper (Renderer).app"
           fi
-
           codesign --force --options runtime --deep --sign "${SIGN_IDENTITY:--}" "./OBS.app/Contents/Resources/data/obs-mac-virtualcam.plugin"
-
           codesign --force --options runtime --entitlements "../CI/scripts/macos/app/entitlements.plist" --sign "${SIGN_IDENTITY:--}" --deep ./OBS.app
-
           codesign -dvv ./OBS.app
       - name: 'Package'
         if: success() && (github.event_name != 'pull_request' || env.SEEKING_TESTERS == '1')
@@ -308,12 +290,10 @@ jobs:
           FILE_DATE=$(date +%Y-%m-%d)
           FILE_NAME=$FILE_DATE-${{ env.OBS_GIT_HASH }}-${{ env.OBS_GIT_TAG }}-macOS.dmg
           echo "FILE_NAME=${FILE_NAME}" >> $GITHUB_ENV
-
           cp ../CI/scripts/macos/package/settings.json.template ./settings.json
           /usr/bin/sed -i '' 's#\$\$VERSION\$\$#${{ env.OBS_GIT_TAG }}#g' ./settings.json
           /usr/bin/sed -i '' 's#\$\$CI_PATH\$\$#../CI/scripts/macos#g' ./settings.json
           /usr/bin/sed -i '' 's#\$\$BUNDLE_PATH\$\$#${{ github.workspace }}/build#g' ./settings.json
-
           dmgbuild "OBS-Studio ${{ env.OBS_GIT_TAG }}" "${FILE_NAME}" -s ./settings.json
           mkdir ../nightly
           codesign --force --sign "${SIGN_IDENTITY:--}" ./"${FILE_NAME}"
@@ -334,17 +314,13 @@ jobs:
           FILE_NAME=$FILE_DATE-${{ env.OBS_GIT_HASH }}-${{ env.OBS_GIT_TAG }}-macOS.dmg
           RELEASE_FILE_NAME=$FILE_DATE-${{ env.OBS_GIT_HASH }}-${{ env.OBS_GIT_TAG }}-rel-macOS.dmg
           echo "RELEASE_FILE_NAME=${RELEASE_FILE_NAME}" >> $GITHUB_ENV
-
           xcrun altool --store-password-in-keychain-item "AC_PASSWORD" -u "${{ secrets.MACOS_NOTARIZATION_USERNAME }}" -p "${{ secrets.MACOS_NOTARIZATION_PASSWORD }}"
-
           xcnotary precheck "./OBS.app"
-
           if [ "$?" -eq 0 ]; then
             xcnotary notarize "$FILE_NAME" --developer-account "${{ secrets.MACOS_NOTARIZATION_USERNAME }}" --developer-password-keychain-item "AC_PASSWORD" --provider "${{ secrets.ASC_PROVIDER_SHORTNAME }}"
           else
             return 1
           fi
-
           mkdir ../release
           sudo mv ./$FILE_NAME ../release/$RELEASE_FILE_NAME
       - name: 'Publish Release'
